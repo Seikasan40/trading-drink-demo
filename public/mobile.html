@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a1a">
-<title>Trading Drink â Mobile</title>
+<title>Trading Drink — Mobile</title>
 <link rel="stylesheet" href="/shared.css">
 <style>
   .m-header {
@@ -96,29 +96,29 @@
 <body>
 
 <div class="m-header">
-  <div class="m-brand"><span class="logo">ð</span><span class="title">TRADING DRINK</span></div>
+  <div class="m-brand"><span class="logo">📈</span><span class="title">TRADING DRINK</span></div>
   <span class="m-live"><span class="dot conn-status"></span> LIVE</span>
 </div>
 <div class="m-session">
-  <div class="m-sess-info"><strong>Table 1 â Les Loups</strong>Session active</div>
+  <div class="m-sess-info"><strong>Table 1 — Les Loups</strong>Session active</div>
   <div class="m-sess-pts" id="pts">0 pts</div>
 </div>
 <div class="m-event" id="evt"></div>
 <div class="m-prices" id="prices"></div>
 <div class="m-lb" id="lb"></div>
-<div class="legal">L'abus d'alcool est dangereux pour la santÃ©. Ã consommer avec modÃ©ration.</div>
+<div class="legal">L'abus d'alcool est dangereux pour la santé. À consommer avec modération.</div>
 
 <div class="modal-bg" id="modal">
   <div class="modal">
     <h3 id="modTitle"></h3>
     <div class="modal-price" id="modPrice"></div>
     <div class="modal-qty">
-      <button class="qty-btn" id="qMinus">â</button>
+      <button class="qty-btn" id="qMinus">−</button>
       <span class="qty-val" id="qVal">1</span>
       <button class="qty-btn" id="qPlus">+</button>
     </div>
     <div class="modal-total">Total : <strong id="modTotal"></strong></div>
-    <button class="btn-order" id="btnOrder">â¡ COMMANDER</button>
+    <button class="btn-order" id="btnOrder">⚡ COMMANDER</button>
     <button class="btn-cancel" id="btnCancel">Annuler</button>
   </div>
 </div>
@@ -136,14 +136,14 @@ document.getElementById('btnOrder').onclick = () => {
   if (!selProd) return;
   socket.emit('order', { pid: selProd.id, qty });
   document.getElementById('modal').classList.remove('show');
-  showToast(`â Commande envoyÃ©e ! ${selProd.emoji} Ã${qty}`);
+  showToast(`✓ Commande envoyée ! ${selProd.emoji} ×${qty}`);
   selProd = null; qty = 1;
 };
 
 function updModal() {
   if (!selProd) return;
   document.getElementById('qVal').textContent = qty;
-  document.getElementById('modTotal').textContent = (selProd.cur * qty).toFixed(2) + 'â¬';
+  document.getElementById('modTotal').textContent = (selProd.cur * qty).toFixed(2) + '€';
 }
 
 window.openOrder = (id) => {
@@ -152,13 +152,13 @@ window.openOrder = (id) => {
   qty = 1;
   document.getElementById('modTitle').textContent = `${selProd.emoji} ${selProd.name}`;
   document.getElementById('modPrice').style.color = col(selProd);
-  document.getElementById('modPrice').textContent = selProd.cur.toFixed(2) + 'â¬';
+  document.getElementById('modPrice').textContent = selProd.cur.toFixed(2) + '€';
   updModal();
   document.getElementById('modal').classList.add('show');
 };
 
 function onPoints(data) {
-  showToast(`+${data.pts} pts â ${data.emoji} ${data.name} confirmÃ© !`);
+  showToast(`+${data.pts} pts — ${data.emoji} ${data.name} confirmé !`);
 }
 
 function onStateUpdate() {
@@ -166,14 +166,14 @@ function onStateUpdate() {
 
   const ev = document.getElementById('evt');
   if (S.event && Date.now() < S.eventEnd) {
-    const msgs = { flash_sale:`â¡ FLASH SALE â ${S.event.emoji||''} -30%`, crash:'ð¥ MARKET CRASH â TOUT -50% !', pump:`ð PUMP â ${S.event.emoji||''} +20%`, happy_trading:'ð HAPPY TRADING â VolatilitÃ© Ã3' };
+    const msgs = { flash_sale:`⚡ FLASH SALE — ${S.event.emoji||''} -30%`, crash:'💥 MARKET CRASH — TOUT -50% !', pump:`🚀 PUMP — ${S.event.emoji||''} +20%`, happy_trading:'🎉 HAPPY TRADING — Volatilité ×3' };
     ev.textContent = msgs[S.event.type] || '';
     ev.className = 'm-event show ' + S.event.type;
   } else { ev.className = 'm-event'; }
 
   document.getElementById('prices').innerHTML = S.products.map(p => {
     const c = col(p);
-    const sign = p.trend==='up'?'+':''; const arrow = p.trend==='up'?'â²':p.trend==='down'?'â¼':'â';
+    const sign = p.trend==='up'?'+':''; const arrow = p.trend==='up'?'▲':p.trend==='down'?'▼':'—';
     const big = Math.abs(p.chg)>=2;
     const flash = p.prev!==p.cur?(p.trend==='up'?'flash-up':'flash-down'):'';
     const glow = big?(p.trend==='up'?'glow-up':'glow-down'):'';
@@ -182,13 +182,13 @@ function onStateUpdate() {
       <span class="emoji">${p.emoji}</span>
       <div class="info"><span class="name">${p.name}</span><span class="cat">${p.cat}</span></div>
       <div class="spark"><svg viewBox="0 0 60 28" preserveAspectRatio="none"><path d="${path}" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg></div>
-      <div class="right"><span class="price" style="color:${c}">${p.cur.toFixed(2)}â¬</span>
+      <div class="right"><span class="price" style="color:${c}">${p.cur.toFixed(2)}€</span>
       <span class="chg" style="color:${c};background:${c}22">${arrow} ${sign}${p.chg.toFixed(1)}%</span></div>
     </div>`;
   }).join('');
 
-  const ranks = ['ð¥','ð¥','ð¥'];
-  document.getElementById('lb').innerHTML = '<div class="m-lb-title">ð Classement</div>' +
+  const ranks = ['🥇','🥈','🥉'];
+  document.getElementById('lb').innerHTML = '<div class="m-lb-title">🏆 Classement</div>' +
     S.lb.slice(0,5).map((e,i) =>
       `<div class="m-lb-row ${e.id==='1'?'me':''}"><span class="m-lb-rank">${i<3?ranks[i]:'#'+(i+1)}</span><span class="m-lb-name">${e.label}</span><span class="m-lb-pts">${e.pts} pts</span></div>`
     ).join('');
