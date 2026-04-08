@@ -1,0 +1,23 @@
+/* TRADING DRINK — Styles partages */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root {
+  --bg: #0a0a1a; --bg2: #12122a; --bg3: #1a1a3a; --border: #1e1e3a;
+  --text: #e8e8f0; --dim: #8a8aa3; --up: #00d4a0; --down: #ff4560;
+  --accent: #6c5ce7; --gold: #ffd700; --stable: #8a8aa3;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+.dot { width:7px; height:7px; border-radius:50%; background:var(--up); animation:pulse 1.5s infinite; display:inline-block; }
+@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 4px var(--up)} 50%{opacity:0.3;box-shadow:0 0 12px var(--up)} }
+@keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes cardFlashUp { 0%{background:rgba(0,212,160,0.12)} 100%{background:var(--bg2)} }
+@keyframes cardFlashDown { 0%{background:rgba(255,69,96,0.12)} 100%{background:var(--bg2)} }
+
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0;
+  background:var(--up); color:#000; padding:12px 24px; border-radius:12px; font-weight:700;
+  font-size:14px; z-index:200; transition:all 0.3s; pointer-events:none; white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
