@@ -1,6 +1,13 @@
 // ================================================================
-// TRADING DRINK — Serveur de demo multi-ecrans
-// Express + Socket.io + Moteur de trading integre
+// TRADING DRINK — Serveur de démo multi-écrans
+// Express + Socket.io + Moteur de trading intégré
+//
+// Accès :
+//   /           → Client mobile
+//   /tv         → Écran TV (à caster sur la télé)
+//   /barman     → Dashboard barman (staff)
+//
+// Toutes les vues sont synchronisées en temps réel via WebSocket.
 // ================================================================
 
 const express = require('express');
@@ -17,8 +24,10 @@ const io = new Server(server, {
   transports: ['websocket', 'polling'],
 });
 
+// Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Routes
 app.get('/',       (_, res) => res.sendFile(path.join(__dirname, 'public', 'mobile.html')));
 app.get('/tv',     (_, res) => res.sendFile(path.join(__dirname, 'public', 'tv.html')));
 app.get('/barman', (_, res) => res.sendFile(path.join(__dirname, 'public', 'barman.html')));
@@ -29,14 +38,14 @@ app.get('/health', (_, res) => res.json({ status: 'ok', tick: state.tick, uptime
 // ================================================================
 
 const PRODUCTS = [
-  { id:'1', name:'Pinte Blonde', emoji:'\u{1F37A}', cat:'Biere',      base:5.50, min:3.00, max:9.00,  vol:0.06 },
-  { id:'2', name:'Mojito',       emoji:'\u{1F378}', cat:'Cocktail',   base:9.00, min:5.50, max:14.00, vol:0.08 },
-  { id:'3', name:'Whisky',       emoji:'\u{1F943}', cat:'Spirit',     base:8.00, min:5.00, max:12.00, vol:0.07 },
-  { id:'4', name:'Spritz',       emoji:'\u{1F379}', cat:'Cocktail',   base:7.50, min:4.50, max:11.00, vol:0.07 },
-  { id:'5', name:'IPA',          emoji:'\u{1F37B}', cat:'Biere',      base:6.00, min:3.50, max:9.50,  vol:0.05 },
-  { id:'6', name:'Margarita',    emoji:'\u{1F9C9}', cat:'Cocktail',   base:10.0, min:6.00, max:15.00, vol:0.09 },
-  { id:'7', name:'Vodka Tonic',  emoji:'\u{1FAE7}', cat:'Long Drink', base:7.00, min:4.00, max:10.50, vol:0.06 },
-  { id:'8', name:'Rhum Arrange', emoji:'\u{1F3DD}\u{FE0F}', cat:'Spirit', base:6.50, min:4.00, max:10.00, vol:0.08 },
+  { id:'1', name:'Pinte Blonde', emoji:'🍺', cat:'Bière',      base:5.50, min:3.00, max:9.00,  vol:0.06 },
+  { id:'2', name:'Mojito',       emoji:'🍸', cat:'Cocktail',   base:9.00, min:5.50, max:14.00, vol:0.08 },
+  { id:'3', name:'Whisky',       emoji:'🥃', cat:'Spirit',     base:8.00, min:5.00, max:12.00, vol:0.07 },
+  { id:'4', name:'Spritz',       emoji:'🍹', cat:'Cocktail',   base:7.50, min:4.50, max:11.00, vol:0.07 },
+  { id:'5', name:'IPA',          emoji:'🍻', cat:'Bière',      base:6.00, min:3.50, max:9.50,  vol:0.05 },
+  { id:'6', name:'Margarita',    emoji:'🧉', cat:'Cocktail',   base:10.0, min:6.00, max:15.00, vol:0.09 },
+  { id:'7', name:'Vodka Tonic',  emoji:'🫧', cat:'Long Drink', base:7.00, min:4.00, max:10.50, vol:0.06 },
+  { id:'8', name:'Rhum Arrangé', emoji:'🏝️', cat:'Spirit',    base:6.50, min:4.00, max:10.00, vol:0.08 },
 ];
 
 const state = {
@@ -49,14 +58,14 @@ const state = {
     spark: Array.from({ length: 20 }, () => p.base + (Math.random() - 0.5) * 0.3),
   })),
   lb: [
-    { id:'1', label:'Table 1 \u2014 Les Loups',   pts:285, orders:14 },
-    { id:'2', label:'Table 5 \u2014 La Meute',     pts:220, orders:11 },
-    { id:'3', label:'Table 3 \u2014 Traders Fous',  pts:175, orders:9 },
-    { id:'4', label:'Table 8 \u2014 YOLO Gang',     pts:140, orders:8 },
-    { id:'5', label:'Table 2 \u2014 Les Baleines',  pts:110, orders:7 },
-    { id:'6', label:'Table 12 \u2014 Crash Test',    pts:85, orders:5 },
-    { id:'7', label:'Table 6 \u2014 Les Etoiles',    pts:60, orders:4 },
-    { id:'8', label:'Table 9 \u2014 Apero Club',     pts:35, orders:3 },
+    { id:'1', label:'Table 1 — Les Loups',   pts:285, orders:14 },
+    { id:'2', label:'Table 5 — La Meute',     pts:220, orders:11 },
+    { id:'3', label:'Table 3 — Traders Fous',  pts:175, orders:9 },
+    { id:'4', label:'Table 8 — YOLO Gang',     pts:140, orders:8 },
+    { id:'5', label:'Table 2 — Les Baleines',  pts:110, orders:7 },
+    { id:'6', label:'Table 12 — Crash Test',    pts:85, orders:5 },
+    { id:'7', label:'Table 6 — Les Étoiles',    pts:60, orders:4 },
+    { id:'8', label:'Table 9 — Apéro Club',     pts:35, orders:3 },
   ],
   pendingOrders: [],
   event: null,
@@ -93,6 +102,7 @@ function engineTick() {
     if (p.spark.length > 30) p.spark.shift();
   }
 
+  // Leaderboard evolution
   if (state.tick % 3 === 0) {
     const idx = Math.floor(Math.random() * state.lb.length);
     state.lb[idx].pts += Math.floor(Math.random() * 12) + 3;
@@ -100,6 +110,7 @@ function engineTick() {
     state.lb.sort((a, b) => b.pts - a.pts);
   }
 
+  // Event expiry
   if (state.event && Date.now() > state.eventEnd) {
     state.event = null;
   }
@@ -112,24 +123,28 @@ function broadcast() {
 }
 
 // ================================================================
-// SOCKET.IO
+// SOCKET.IO — Communication temps réel
 // ================================================================
 
 io.on('connection', (socket) => {
-  console.log('[+] Client connecte: ' + socket.id);
+  console.log(`[+] Client connecté: ${socket.id}`);
+
+  // Envoyer l'état actuel immédiatement
   socket.emit('state', state);
 
+  // Barman déclenche un événement
   socket.on('event', (data) => {
-    if (state.event) return;
+    if (state.event) return; // un seul à la fois
     const p = state.products.find(x => x.id === data.pid);
     const dur = data.type === 'crash' ? 30 : data.type === 'happy_trading' ? 60 : 45;
     state.event = { type: data.type, pid: p?.id, name: p?.name, emoji: p?.emoji };
     state.eventEnd = Date.now() + dur * 1000;
-    console.log('[EVENT] ' + data.type + (p ? ' sur ' + p.name : '') + ' (' + dur + 's)');
+    console.log(`[EVENT] ${data.type} déclenché${p ? ` sur ${p.name}` : ''} (${dur}s)`);
     setTimeout(() => { state.event = null; broadcast(); }, dur * 1000);
     broadcast();
   });
 
+  // Client passe une commande
   socket.on('order', (data) => {
     const p = state.products.find(x => x.id === data.pid);
     if (!p) return;
@@ -142,10 +157,11 @@ io.on('connection', (socket) => {
     };
     state.pendingOrders.push(order);
     state.totalOrders++;
-    console.log('[ORDER] ' + p.emoji + ' ' + p.name + ' x' + order.qty + ' — ' + order.total.toFixed(2) + 'EUR');
+    console.log(`[ORDER] ${p.emoji} ${p.name} x${order.qty} — ${order.total.toFixed(2)}€`);
     broadcast();
   });
 
+  // Barman confirme une commande
   socket.on('confirm', (data) => {
     const idx = state.pendingOrders.findIndex(o => o.id === data.oid);
     if (idx === -1) return;
@@ -154,39 +170,47 @@ io.on('connection', (socket) => {
     const pts = 10 + bonus;
     state.myPts += pts;
     state.lb[0].pts = state.myPts;
-    console.log('[CONFIRM] ' + o.emoji + ' ' + o.name + ' — +' + pts + ' pts');
+    console.log(`[CONFIRM] ${o.emoji} ${o.name} — +${pts} pts`);
     io.emit('points', { pts, name: o.name, emoji: o.emoji });
     broadcast();
   });
 
+  // Barman annule une commande
   socket.on('cancel', (data) => {
     state.pendingOrders = state.pendingOrders.filter(o => o.id !== data.oid);
     broadcast();
   });
 
+  // Kill switch
   socket.on('kill', () => {
     state.frozen = !state.frozen;
-    console.log('[KILL] Moteur ' + (state.frozen ? 'GELE' : 'RELANCE'));
+    console.log(`[KILL] Moteur ${state.frozen ? 'GELÉ' : 'RELANCÉ'}`);
     broadcast();
   });
 
   socket.on('disconnect', () => {
-    console.log('[-] Client deconnecte: ' + socket.id);
+    console.log(`[-] Client déconnecté: ${socket.id}`);
   });
 });
 
 // ================================================================
-// DEMARRAGE
+// DÉMARRAGE
 // ================================================================
 
+// Tick toutes les 3.5 secondes
 setInterval(engineTick, 3500);
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log('');
-  console.log('  TRADING DRINK — LIVE DEMO');
-  console.log('  Mobile :  http://localhost:' + PORT + '/');
-  console.log('  TV     :  http://localhost:' + PORT + '/tv');
-  console.log('  Barman :  http://localhost:' + PORT + '/barman');
-  console.log('  Moteur de trading : actif (3.5s/tick)');
+  console.log('  ╔══════════════════════════════════════════╗');
+  console.log('  ║       📈 TRADING DRINK — LIVE DEMO       ║');
+  console.log('  ╠══════════════════════════════════════════╣');
+  console.log(`  ║  📱 Mobile :  http://localhost:${PORT}/        ║`);
+  console.log(`  ║  📺 TV     :  http://localhost:${PORT}/tv      ║`);
+  console.log(`  ║  🍸 Barman :  http://localhost:${PORT}/barman  ║`);
+  console.log('  ╠══════════════════════════════════════════╣');
+  console.log('  ║  Moteur de trading : actif (3.5s/tick)   ║');
+  console.log('  ║  WebSocket : prêt                        ║');
+  console.log('  ╚══════════════════════════════════════════╝');
   console.log('');
 });
