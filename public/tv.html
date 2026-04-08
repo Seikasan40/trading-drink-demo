@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Trading Drink â TV</title>
+<link rel="stylesheet" href="/shared.css">
+<style>
+  body { overflow:hidden; }
+  .tv { width:100vw; height:100vh; display:flex; flex-direction:column; background:var(--bg); overflow:hidden; }
+
+  .tv-head {
+    display:flex; justify-content:space-between; align-items:center; padding:10px 24px;
+    background:linear-gradient(180deg,#12122a,#0a0a1a); border-bottom:1px solid var(--border);
+    height:56px; flex-shrink:0;
+  }
+  .tv-brand { display:flex; align-items:center; gap:10px; }
+  .tv-brand .logo { font-size:24px; }
+  .tv-brand .title { font-size:18px; font-weight:900; letter-spacing:2px; background:linear-gradient(135deg,#6c5ce7,#a855f7,#00d4a0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .tv-live { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--up); letter-spacing:1px; margin-left:10px; }
+  .tv-stats { display:flex; gap:36px; }
+  .tv-stat { text-align:center; }
+  .tv-stat-val { font-size:16px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .tv-stat-lbl { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; }
+  .tv-clock { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:700; color:var(--dim); }
+
+  .tv-event {
+    padding:12px 28px; display:none; justify-content:space-between; align-items:center;
+    font-size:18px; font-weight:800; letter-spacing:1px; animation:slideDown 0.35s ease-out; flex-shrink:0;
+  }
+  .tv-event.show { display:flex; }
+  .tv-event.flash_sale { background:linear-gradient(90deg,rgba(255,107,53,0.95),rgba(255,69,96,0.95)); }
+  .tv-event.crash { background:linear-gradient(90deg,rgba(220,0,0,0.95),rgba(160,0,0,0.95)); animation:slideDown 0.35s ease-out, shake 0.6s ease-out; }
+  .tv-event.pump { background:linear-gradient(90deg,rgba(0,212,160,0.95),rgba(108,92,231,0.95)); }
+  .tv-event.happy_trading { background:linear-gradient(90deg,rgba(255,215,0,0.9),rgba(255,165,0,0.9)); color:#000; }
+  .tv-event-timer { font-family:'JetBrains Mono',monospace; font-size:22px; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 15%,45%,75%{transform:translateX(-5px)} 30%,60%,90%{transform:translateX(5px)} }
+
+  .tv-main { flex:1; display:flex; overflow:hidden; min-height:0; }
+  .tv-charts { flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; padding:8px; }
+  .tv-sidebar { width:300px; flex-shrink:0; background:var(--bg2); border-left:1px solid var(--border); padding:12px; display:flex; flex-direction:column; overflow:hidden; }
+  .tv-sb-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:10px; }
+  .tv-lb-row { display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:6px; margin-bottom:2px; }
+  .tv-lb-row.top { background:rgba(255,215,0,0.05); }
+  .tv-lb-rank { width:26px; text-align:center; font-size:16px; flex-shrink:0; }
+  .tv-lb-badge { font-size:16px; flex-shrink:0; }
+  .tv-lb-name { flex:1; font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tv-lb-pts { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--gold); }
+
+  .ch {
+    background:var(--bg2); border-radius:10px; border:1px solid var(--border); display:flex;
+    flex-direction:column; padding:12px 14px 6px; overflow:hidden; transition:border-color 0.3s;
+  }
+  .ch.glow-up { border-color:rgba(0,212,160,0.3); box-shadow:inset 0 0 20px rgba(0,212,160,0.04); }
+  .ch.glow-down { border-color:rgba(255,69,96,0.3); box-shadow:inset 0 0 20px rgba(255,69,96,0.04); }
+  .ch-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .ch-left { display:flex; align-items:center; gap:8px; }
+  .ch-emoji { font-size:26px; }
+  .ch-name { font-size:15px; font-weight:700; }
+  .ch-cat { font-size:11px; color:var(--dim); }
+  .ch-price { font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:800; }
+  .ch-chg { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; padding:2px 8px; border-radius:5px; display:inline-block; margin-top:2px; }
+  .ch-svg { flex:1; min-height:0; }
+  .ch-svg svg { width:100%; height:100%; }
+  .ch-range { display:flex; align-items:center; gap:6px; margin-top:4px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.04); }
+  .ch-range-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--dim); }
+  .ch-range-bar { flex:1; height:3px; background:#1a1a3a; border-radius:2px; position:relative; }
+  .ch-range-dot { width:8px; height:8px; border-radius:50%; position:absolute; top:-2.5px; transition:left 0.5s ease; }
+
+  .tv-ticker {
+    height:42px; background:#08081a; border-top:1px solid var(--border);
+    display:flex; align-items:center; overflow:hidden; flex-shrink:0;
+  }
+  .tv-ticker-live { padding:0 14px; display:flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:var(--up); letter-spacing:1px; border-right:1px solid var(--border); height:100%; background:#08081a; z-index:1; flex-shrink:0; }
+  .tv-ticker-track { display:flex; animation:tickerScroll 45s linear infinite; white-space:nowrap; }
+  .tv-ticker-item { display:inline-flex; align-items:center; gap:6px; padding:0 18px; font-size:13px; }
+  @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-33.33%)} }
+  .tv-legal { height:22px; background:#06060f; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--dim); flex-shrink:0; }
+</style>
+</head>
+<body>
+<div class="tv">
+  <div class="tv-head">
+    <div class="tv-brand"><span class="logo">ð</span><span class="title">TRADING DRINK</span><span class="tv-live"><span class="dot conn-status"></span>LIVE</span></div>
+    <div class="tv-stats">
+      <div class="tv-stat"><div class="tv-stat-val" id="tvTables">0</div><div class="tv-stat-lbl">Tables actives</div></div>
+      <div class="tv-stat"><div class="tv-stat-val" id="tvMover">â</div><div class="tv-stat-lbl">Top Mover</div></div>
+      <div class="tv-stat"><div class="tv-stat-val" id="tvMarket">â</div><div class="tv-stat-lbl">MarchÃ©</div></div>
+    </div>
+    <div class="tv-clock" id="tvClock">--:--:--</div>
+  </div>
+  <div class="tv-event" id="tvEvent"></div>
+  <div class="tv-main">
+    <div class="tv-charts" id="tvCharts"></div>
+    <div class="tv-sidebar"><div class="tv-sb-title">ð Classement Live</div><div id="tvLb"></div></div>
+  </div>
+  <div class="tv-ticker"><div class="tv-ticker-live"><span class="dot"></span>LIVE</div><div class="tv-ticker-track" id="tvTicker"></div></div>
+  <div class="tv-legal">L'abus d'alcool est dangereux pour la santÃ©. Ã consommer avec modÃ©ration.</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared.js"></script>
+<script>
+setInterval(() => { const el=document.getElementById('tvClock'); if(el) el.textContent=new Date().toLocaleTimeString('fr-FR'); }, 1000);
+
+function onStateUpdate() {
+  document.getElementById('tvTables').textContent = S.lb.length;
+  document.getElementById('tvClock').textContent = new Date().toLocaleTimeString('fr-FR');
+
+  const top = S.products.reduce((b,p)=>Math.abs(p.chg)>Math.abs(b.chg)?p:b, S.products[0]);
+  if (top) {
+    const tc = col(top);
+    document.getElementById('tvMover').innerHTML = `<span style="color:${tc}">${top.emoji} ${top.chg>0?'+':''}${top.chg.toFixed(1)}%</span>`;
+  }
+  const up = S.products.filter(p=>p.trend==='up').length;
+  const dn = S.products.filter(p=>p.trend==='down').length;
+  document.getElementById('tvMarket').innerHTML = `<span style="color:var(--up)">${up}â</span><span style="color:var(--dim);margin:0 3px">/</span><span style="color:var(--down)">${dn}â</span>`;
+
+  // Event
+  const ev = document.getElementById('tvEvent');
+  if (S.event && Date.now() < S.eventEnd) {
+    const secs = Math.max(0, Math.ceil((S.eventEnd - Date.now())/1000));
+    const msgs = { flash_sale:`â¡ FLASH SALE â ${S.event.emoji||''} ${S.event.name||''} -30%`, crash:'ð¥ MARKET CRASH â TOUS LES PRIX -50% !', pump:`ð PUMP â ${S.event.emoji||''} ${S.event.name||''} +20%`, happy_trading:'ð HAPPY TRADING â VolatilitÃ© Ã3 !' };
+    ev.className = 'tv-event show ' + S.event.type;
+    ev.innerHTML = `<span>${msgs[S.event.type]||''}</span><span class="tv-event-timer">${Math.floor(secs/60)}:${(secs%60).toString().padStart(2,'0')}</span>`;
+  } else { ev.className = 'tv-event'; }
+
+  // Charts
+  const sorted = [...S.products].sort((a,b)=>Math.abs(b.chg)-Math.abs(a.chg));
+  document.getElementById('tvCharts').innerHTML = sorted.slice(0,4).map(p => {
+    const c=col(p); const sign=p.trend==='up'?'+':''; const arrow=p.trend==='up'?'â²':p.trend==='down'?'â¼':'â';
+    const big=Math.abs(p.chg)>=2; const glow=big?(p.trend==='up'?'glow-up':'glow-down'):'';
+    const {path,area,last}=svgPath(p.spark,600,180);
+    const rangePos=Math.max(0,Math.min(100,((p.cur-p.min)/(p.max-p.min))*100));
+    return `<div class="ch ${glow}">
+      <div class="ch-head">
+        <div class="ch-left"><span class="ch-emoji">${p.emoji}</span><div><div class="ch-name">${p.name}</div><div class="ch-cat">${p.cat}</div></div></div>
+        <div style="text-align:right"><div class="ch-price" style="color:${c}">${p.cur.toFixed(2)}â¬</div>
+        <span class="ch-chg" style="color:${c};background:${c}22">${arrow} ${sign}${p.chg.toFixed(1)}%</span></div>
+      </div>
+      <div class="ch-svg"><svg viewBox="0 0 600 180" preserveAspectRatio="none">
+        <defs><linearGradient id="a${p.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${c}" stop-opacity="0.3"/><stop offset="100%" stop-color="${c}" stop-opacity="0.02"/></linearGradient>
+        <filter id="g${p.id}"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path d="${area}" fill="url(#a${p.id})"/>
+        <path d="${path}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round" filter="url(#g${p.id})"/>
+        ${last?`<circle cx="${last.x}" cy="${last.y}" r="4" fill="${c}" filter="url(#g${p.id})"/>`:''}</svg></div>
+      <div class="ch-range"><span class="ch-range-lbl">${p.min.toFixed(2)}â¬</span><div class="ch-range-bar"><div class="ch-range-dot" style="left:${rangePos}%;background:${c};box-shadow:0 0 6px ${c}"></div></div><span class="ch-range-lbl">${p.max.toFixed(2)}â¬</span></div>
+    </div>`;
+  }).join('');
+
+  // Leaderboard
+  const ranks=['ð¥','ð¥','ð¥'];
+  const getBadge=pts=>pts>=400?'ð':pts>=250?'ð':pts>=150?'ð':pts>=80?'ð¹':pts>=30?'ð±':'ð';
+  document.getElementById('tvLb').innerHTML = S.lb.slice(0,10).map((e,i)=>
+    `<div class="tv-lb-row ${i<3?'top':''}"><span class="tv-lb-rank">${i<3?ranks[i]:'#'+(i+1)}</span><span class="tv-lb-badge">${getBadge(e.pts)}</span><span class="tv-lb-name">${e.label}</span><span class="tv-lb-pts">${e.pts}</span></div>`
+  ).join('');
+
+  // Ticker
+  const items=[...S.products,...S.products,...S.products];
+  document.getElementById('tvTicker').innerHTML = items.map(p=>{
+    const c=col(p); const sign=p.trend==='up'?'+':''; const arrow=p.trend==='up'?'â²':p.trend==='down'?'â¼':'â';
+    return `<span class="tv-ticker-item"><span>${p.emoji}</span><span style="font-weight:600">${p.name}</span><span style="color:${c};font-family:'JetBrains Mono',monospace;font-weight:700">${p.cur.toFixed(2)}â¬</span><span style="color:${c};font-size:11px;font-weight:600">${arrow}${sign}${p.chg.toFixed(1)}%</span><span style="color:var(--dim);opacity:0.2">â</span></span>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
