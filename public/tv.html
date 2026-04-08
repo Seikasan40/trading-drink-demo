@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920">
-<title>Trading Drink â TV</title>
+<title>Trading Drink — TV</title>
 <link rel="stylesheet" href="/shared.css">
 <style>
   body { overflow:hidden; }
@@ -81,21 +81,21 @@
 <body>
 <div class="tv">
   <div class="tv-head">
-    <div class="tv-brand"><span class="logo">ð</span><span class="title">TRADING DRINK</span><span class="tv-live"><span class="dot conn-status"></span>LIVE</span></div>
+    <div class="tv-brand"><span class="logo">📈</span><span class="title">TRADING DRINK</span><span class="tv-live"><span class="dot conn-status"></span>LIVE</span></div>
     <div class="tv-stats">
       <div class="tv-stat"><div class="tv-stat-val" id="tvTables">0</div><div class="tv-stat-lbl">Tables actives</div></div>
-      <div class="tv-stat"><div class="tv-stat-val" id="tvMover">â</div><div class="tv-stat-lbl">Top Mover</div></div>
-      <div class="tv-stat"><div class="tv-stat-val" id="tvMarket">â</div><div class="tv-stat-lbl">MarchÃ©</div></div>
+      <div class="tv-stat"><div class="tv-stat-val" id="tvMover">—</div><div class="tv-stat-lbl">Top Mover</div></div>
+      <div class="tv-stat"><div class="tv-stat-val" id="tvMarket">—</div><div class="tv-stat-lbl">Marché</div></div>
     </div>
     <div class="tv-clock" id="tvClock">--:--:--</div>
   </div>
   <div class="tv-event" id="tvEvent"></div>
   <div class="tv-main">
     <div class="tv-charts" id="tvCharts"></div>
-    <div class="tv-sidebar"><div class="tv-sb-title">ð Classement Live</div><div id="tvLb"></div></div>
+    <div class="tv-sidebar"><div class="tv-sb-title">🏆 Classement Live</div><div id="tvLb"></div></div>
   </div>
   <div class="tv-ticker"><div class="tv-ticker-live"><span class="dot"></span>LIVE</div><div class="tv-ticker-track" id="tvTicker"></div></div>
-  <div class="tv-legal">L'abus d'alcool est dangereux pour la santÃ©. Ã consommer avec modÃ©ration.</div>
+  <div class="tv-legal">L'abus d'alcool est dangereux pour la santé. À consommer avec modération.</div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -114,13 +114,13 @@ function onStateUpdate() {
   }
   const up = S.products.filter(p=>p.trend==='up').length;
   const dn = S.products.filter(p=>p.trend==='down').length;
-  document.getElementById('tvMarket').innerHTML = `<span style="color:var(--up)">${up}â</span><span style="color:var(--dim);margin:0 3px">/</span><span style="color:var(--down)">${dn}â</span>`;
+  document.getElementById('tvMarket').innerHTML = `<span style="color:var(--up)">${up}↑</span><span style="color:var(--dim);margin:0 3px">/</span><span style="color:var(--down)">${dn}↓</span>`;
 
   // Event
   const ev = document.getElementById('tvEvent');
   if (S.event && Date.now() < S.eventEnd) {
     const secs = Math.max(0, Math.ceil((S.eventEnd - Date.now())/1000));
-    const msgs = { flash_sale:`â¡ FLASH SALE â ${S.event.emoji||''} ${S.event.name||''} -30%`, crash:'ð¥ MARKET CRASH â TOUS LES PRIX -50% !', pump:`ð PUMP â ${S.event.emoji||''} ${S.event.name||''} +20%`, happy_trading:'ð HAPPY TRADING â VolatilitÃ© Ã3 !' };
+    const msgs = { flash_sale:`⚡ FLASH SALE — ${S.event.emoji||''} ${S.event.name||''} -30%`, crash:'💥 MARKET CRASH — TOUS LES PRIX -50% !', pump:`🚀 PUMP — ${S.event.emoji||''} ${S.event.name||''} +20%`, happy_trading:'🎉 HAPPY TRADING — Volatilité ×3 !' };
     ev.className = 'tv-event show ' + S.event.type;
     ev.innerHTML = `<span>${msgs[S.event.type]||''}</span><span class="tv-event-timer">${Math.floor(secs/60)}:${(secs%60).toString().padStart(2,'0')}</span>`;
   } else { ev.className = 'tv-event'; }
@@ -128,14 +128,14 @@ function onStateUpdate() {
   // Charts
   const sorted = [...S.products].sort((a,b)=>Math.abs(b.chg)-Math.abs(a.chg));
   document.getElementById('tvCharts').innerHTML = sorted.slice(0,4).map(p => {
-    const c=col(p); const sign=p.trend==='up'?'+':''; const arrow=p.trend==='up'?'â²':p.trend==='down'?'â¼':'â';
+    const c=col(p); const sign=p.trend==='up'?'+':''; const arrow=p.trend==='up'?'▲':p.trend==='down'?'▼':'—';
     const big=Math.abs(p.chg)>=2; const glow=big?(p.trend==='up'?'glow-up':'glow-down'):'';
     const {path,area,last}=svgPath(p.spark,600,180);
     const rangePos=Math.max(0,Math.min(100,((p.cur-p.min)/(p.max-p.min))*100));
     return `<div class="ch ${glow}">
       <div class="ch-head">
         <div class="ch-left"><span class="ch-emoji">${p.emoji}</span><div><div class="ch-name">${p.name}</div><div class="ch-cat">${p.cat}</div></div></div>
-        <div style="text-align:right"><div class="ch-price" style="color:${c}">${p.cur.toFixed(2)}â¬</div>
+        <div style="text-align:right"><div class="ch-price" style="color:${c}">${p.cur.toFixed(2)}€</div>
         <span class="ch-chg" style="color:${c};background:${c}22">${arrow} ${sign}${p.chg.toFixed(1)}%</span></div>
       </div>
       <div class="ch-svg"><svg viewBox="0 0 600 180" preserveAspectRatio="none">
@@ -144,13 +144,13 @@ function onStateUpdate() {
         <path d="${area}" fill="url(#a${p.id})"/>
         <path d="${path}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round" filter="url(#g${p.id})"/>
         ${last?`<circle cx="${last.x}" cy="${last.y}" r="4" fill="${c}" filter="url(#g${p.id})"/>`:''}</svg></div>
-      <div class="ch-range"><span class="ch-range-lbl">${p.min.toFixed(2)}â¬</span><div class="ch-range-bar"><div class="ch-range-dot" style="left:${rangePos}%;background:${c};box-shadow:0 0 6px ${c}"></div></div><span class="ch-range-lbl">${p.max.toFixed(2)}â¬</span></div>
+      <div class="ch-range"><span class="ch-range-lbl">${p.min.toFixed(2)}€</span><div class="ch-range-bar"><div class="ch-range-dot" style="left:${rangePos}%;background:${c};box-shadow:0 0 6px ${c}"></div></div><span class="ch-range-lbl">${p.max.toFixed(2)}€</span></div>
     </div>`;
   }).join('');
 
   // Leaderboard
-  const ranks=['ð¥','ð¥','ð¥'];
-  const getBadge=pts=>pts>=400?'ð':pts>=250?'ð':pts>=150?'ð':pts>=80?'ð¹':pts>=30?'ð±':'ð';
+  const ranks=['🥇','🥈','🥉'];
+  const getBadge=pts=>pts>=400?'🐋':pts>=250?'💎':pts>=150?'📊':pts>=80?'💹':pts>=30?'🌱':'👀';
   document.getElementById('tvLb').innerHTML = S.lb.slice(0,10).map((e,i)=>
     `<div class="tv-lb-row ${i<3?'top':''}"><span class="tv-lb-rank">${i<3?ranks[i]:'#'+(i+1)}</span><span class="tv-lb-badge">${getBadge(e.pts)}</span><span class="tv-lb-name">${e.label}</span><span class="tv-lb-pts">${e.pts}</span></div>`
   ).join('');
@@ -158,8 +158,8 @@ function onStateUpdate() {
   // Ticker
   const items=[...S.products,...S.products,...S.products];
   document.getElementById('tvTicker').innerHTML = items.map(p=>{
-    const c=col(p); const sign=p.trend==='up'?'+':''; const arrow=p.trend==='up'?'â²':p.trend==='down'?'â¼':'â';
-    return `<span class="tv-ticker-item"><span>${p.emoji}</span><span style="font-weight:600">${p.name}</span><span style="color:${c};font-family:'JetBrains Mono',monospace;font-weight:700">${p.cur.toFixed(2)}â¬</span><span style="color:${c};font-size:11px;font-weight:600">${arrow}${sign}${p.chg.toFixed(1)}%</span><span style="color:var(--dim);opacity:0.2">â</span></span>`;
+    const c=col(p); const sign=p.trend==='up'?'+':''; const arrow=p.trend==='up'?'▲':p.trend==='down'?'▼':'—';
+    return `<span class="tv-ticker-item"><span>${p.emoji}</span><span style="font-weight:600">${p.name}</span><span style="color:${c};font-family:'JetBrains Mono',monospace;font-weight:700">${p.cur.toFixed(2)}€</span><span style="color:${c};font-size:11px;font-weight:600">${arrow}${sign}${p.chg.toFixed(1)}%</span><span style="color:var(--dim);opacity:0.2">◆</span></span>`;
   }).join('');
 }
 </script>
