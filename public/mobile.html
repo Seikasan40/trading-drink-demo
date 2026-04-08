@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a1a">
+<title>Trading Drink â Mobile</title>
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .m-header {
+    padding:14px 20px; display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:0; z-index:10;
+  }
+  .m-brand { display:flex; align-items:center; gap:8px; }
+  .m-brand .logo { font-size:22px; }
+  .m-brand .title { font-size:16px; font-weight:800; background:linear-gradient(135deg,#6c5ce7,#a855f7,#00d4a0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .m-live { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--up); }
+
+  .m-session {
+    padding:12px 20px; background:rgba(108,92,231,0.06); border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .m-sess-info { font-size:13px; color:var(--dim); }
+  .m-sess-info strong { color:var(--text); font-size:15px; display:block; }
+  .m-sess-pts { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:800; color:var(--gold); }
+
+  .m-event {
+    padding:10px 20px; font-weight:700; font-size:14px; text-align:center; display:none;
+    animation:slideDown 0.35s ease-out;
+  }
+  .m-event.show { display:block; }
+  .m-event.flash_sale { background:linear-gradient(90deg,rgba(255,107,53,0.92),rgba(255,69,96,0.92)); }
+  .m-event.crash { background:linear-gradient(90deg,rgba(220,0,0,0.95),rgba(160,0,0,0.95)); }
+  .m-event.pump { background:linear-gradient(90deg,rgba(0,212,160,0.92),rgba(108,92,231,0.92)); }
+  .m-event.happy_trading { background:linear-gradient(90deg,rgba(255,215,0,0.85),rgba(255,165,0,0.85)); color:#000; }
+
+  .m-prices { padding:8px 16px; }
+  .pc {
+    display:flex; align-items:center; gap:12px; padding:14px 16px; background:var(--bg2);
+    border-radius:12px; margin-bottom:8px; border:1px solid var(--border); cursor:pointer;
+    transition:all 0.2s; position:relative; overflow:hidden;
+  }
+  .pc:active { transform:scale(0.98); }
+  .pc.glow-up { border-color:rgba(0,212,160,0.35); }
+  .pc.glow-down { border-color:rgba(255,69,96,0.35); }
+  .pc .emoji { font-size:28px; flex-shrink:0; }
+  .pc .info { flex:1; min-width:0; }
+  .pc .name { font-size:15px; font-weight:700; display:block; }
+  .pc .cat { font-size:11px; color:var(--dim); }
+  .pc .spark { width:60px; height:28px; flex-shrink:0; }
+  .pc .spark svg { width:100%; height:100%; }
+  .pc .right { text-align:right; flex-shrink:0; }
+  .pc .price { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:800; display:block; }
+  .pc .chg { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; padding:2px 8px; border-radius:6px; display:inline-block; margin-top:2px; }
+  .pc.flash-up { animation:cardFlashUp 0.5s ease-out; }
+  .pc.flash-down { animation:cardFlashDown 0.5s ease-out; }
+
+  .m-lb { padding:16px; }
+  .m-lb-title { font-size:16px; font-weight:800; margin-bottom:10px; }
+  .m-lb-row { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg2); border-radius:8px; margin-bottom:4px; }
+  .m-lb-row.me { border:1px solid var(--accent); background:rgba(108,92,231,0.08); }
+  .m-lb-rank { width:24px; text-align:center; font-size:16px; flex-shrink:0; }
+  .m-lb-name { flex:1; font-size:13px; font-weight:600; }
+  .m-lb-pts { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--gold); }
+
+  .modal-bg {
+    position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-bg.show { display:flex; }
+  .modal {
+    background:var(--bg2); border-radius:20px 20px 0 0; padding:24px; width:100%; max-width:480px;
+    border:1px solid var(--border); animation:modalUp 0.3s ease-out;
+  }
+  @keyframes modalUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .modal h3 { font-size:20px; text-align:center; margin-bottom:4px; }
+  .modal-price { font-family:'JetBrains Mono',monospace; font-size:34px; font-weight:800; text-align:center; margin:10px 0; }
+  .modal-qty { display:flex; align-items:center; justify-content:center; gap:24px; margin:16px 0; }
+  .qty-btn { width:48px; height:48px; border-radius:50%; border:2px solid var(--border); background:none; color:var(--text); font-size:22px; cursor:pointer; font-weight:700; }
+  .qty-btn:active { background:rgba(108,92,231,0.2); }
+  .qty-val { font-family:'JetBrains Mono',monospace; font-size:30px; font-weight:800; min-width:40px; text-align:center; }
+  .modal-total { text-align:center; font-size:14px; color:var(--dim); margin-bottom:20px; }
+  .modal-total strong { color:var(--gold); font-size:20px; font-family:'JetBrains Mono',monospace; }
+  .btn-order {
+    width:100%; padding:16px; border:none; border-radius:12px; font-size:17px; font-weight:800;
+    background:linear-gradient(135deg,#6c5ce7,#a855f7); color:#fff; cursor:pointer; letter-spacing:1px;
+  }
+  .btn-order:active { transform:scale(0.97); }
+  .btn-cancel { width:100%; padding:12px; border:none; background:none; color:var(--dim); font-size:14px; cursor:pointer; margin-top:6px; }
+
+  .legal { padding:8px; text-align:center; font-size:9px; color:var(--dim); background:#06060f; margin-top:16px; }
+
+  @media(min-width:600px) { .m-prices,.m-session,.m-lb { max-width:560px; margin-left:auto; margin-right:auto; } }
+</style>
+</head>
+<body>
+
+<div class="m-header">
+  <div class="m-brand"><span class="logo">ð</span><span class="title">TRADING DRINK</span></div>
+  <span class="m-live"><span class="dot conn-status"></span> LIVE</span>
+</div>
+<div class="m-session">
+  <div class="m-sess-info"><strong>Table 1 â Les Loups</strong>Session active</div>
+  <div class="m-sess-pts" id="pts">0 pts</div>
+</div>
+<div class="m-event" id="evt"></div>
+<div class="m-prices" id="prices"></div>
+<div class="m-lb" id="lb"></div>
+<div class="legal">L'abus d'alcool est dangereux pour la santÃ©. Ã consommer avec modÃ©ration.</div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modTitle"></h3>
+    <div class="modal-price" id="modPrice"></div>
+    <div class="modal-qty">
+      <button class="qty-btn" id="qMinus">â</button>
+      <span class="qty-val" id="qVal">1</span>
+      <button class="qty-btn" id="qPlus">+</button>
+    </div>
+    <div class="modal-total">Total : <strong id="modTotal"></strong></div>
+    <button class="btn-order" id="btnOrder">â¡ COMMANDER</button>
+    <button class="btn-cancel" id="btnCancel">Annuler</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared.js"></script>
+<script>
+let selProd = null, qty = 1;
+
+document.getElementById('qMinus').onclick = () => { qty = Math.max(1, qty-1); updModal(); };
+document.getElementById('qPlus').onclick = () => { qty = Math.min(10, qty+1); updModal(); };
+document.getElementById('btnCancel').onclick = () => document.getElementById('modal').classList.remove('show');
+document.getElementById('btnOrder').onclick = () => {
+  if (!selProd) return;
+  socket.emit('order', { pid: selProd.id, qty });
+  document.getElementById('modal').classList.remove('show');
+  showToast(`â Commande envoyÃ©e ! ${selProd.emoji} Ã${qty}`);
+  selProd = null; qty = 1;
+};
+
+function updModal() {
+  if (!selProd) return;
+  document.getElementById('qVal').textContent = qty;
+  document.getElementById('modTotal').textContent = (selProd.cur * qty).toFixed(2) + 'â¬';
+}
+
+window.openOrder = (id) => {
+  selProd = S.products.find(p => p.id === id);
+  if (!selProd) return;
+  qty = 1;
+  document.getElementById('modTitle').textContent = `${selProd.emoji} ${selProd.name}`;
+  document.getElementById('modPrice').style.color = col(selProd);
+  document.getElementById('modPrice').textContent = selProd.cur.toFixed(2) + 'â¬';
+  updModal();
+  document.getElementById('modal').classList.add('show');
+};
+
+function onPoints(data) {
+  showToast(`+${data.pts} pts â ${data.emoji} ${data.name} confirmÃ© !`);
+}
+
+function onStateUpdate() {
+  document.getElementById('pts').textContent = S.myPts + ' pts';
+
+  const ev = document.getElementById('evt');
+  if (S.event && Date.now() < S.eventEnd) {
+    const msgs = { flash_sale:`â¡ FLASH SALE â ${S.event.emoji||''} -30%`, crash:'ð¥ MARKET CRASH â TOUT -50% !', pump:`ð PUMP â ${S.event.emoji||''} +20%`, happy_trading:'ð HAPPY TRADING â VolatilitÃ© Ã3' };
+    ev.textContent = msgs[S.event.type] || '';
+    ev.className = 'm-event show ' + S.event.type;
+  } else { ev.className = 'm-event'; }
+
+  document.getElementById('prices').innerHTML = S.products.map(p => {
+    const c = col(p);
+    const sign = p.trend==='up'?'+':''; const arrow = p.trend==='up'?'â²':p.trend==='down'?'â¼':'â';
+    const big = Math.abs(p.chg)>=2;
+    const flash = p.prev!==p.cur?(p.trend==='up'?'flash-up':'flash-down'):'';
+    const glow = big?(p.trend==='up'?'glow-up':'glow-down'):'';
+    const {path} = svgPath(p.spark.slice(-12),60,28);
+    return `<div class="pc ${flash} ${glow}" onclick="openOrder('${p.id}')">
+      <span class="emoji">${p.emoji}</span>
+      <div class="info"><span class="name">${p.name}</span><span class="cat">${p.cat}</span></div>
+      <div class="spark"><svg viewBox="0 0 60 28" preserveAspectRatio="none"><path d="${path}" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="right"><span class="price" style="color:${c}">${p.cur.toFixed(2)}â¬</span>
+      <span class="chg" style="color:${c};background:${c}22">${arrow} ${sign}${p.chg.toFixed(1)}%</span></div>
+    </div>`;
+  }).join('');
+
+  const ranks = ['ð¥','ð¥','ð¥'];
+  document.getElementById('lb').innerHTML = '<div class="m-lb-title">ð Classement</div>' +
+    S.lb.slice(0,5).map((e,i) =>
+      `<div class="m-lb-row ${e.id==='1'?'me':''}"><span class="m-lb-rank">${i<3?ranks[i]:'#'+(i+1)}</span><span class="m-lb-name">${e.label}</span><span class="m-lb-pts">${e.pts} pts</span></div>`
+    ).join('');
+}
+</script>
+</body>
+</html>
