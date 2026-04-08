@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Trading Drink â Barman</title>
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .b-header {
+    padding:14px 20px; background:linear-gradient(135deg,#1a0a2e,#0a1a2e);
+    border-bottom:2px solid var(--accent); display:flex; justify-content:space-between; align-items:center;
+    position:sticky; top:0; z-index:10;
+  }
+  .b-title { font-size:18px; font-weight:800; color:var(--accent); }
+  .b-badge { font-size:11px; background:var(--accent); color:#fff; padding:4px 12px; border-radius:20px; font-weight:700; }
+  .b-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 16px; }
+  .bs { background:var(--bg2); border-radius:10px; padding:14px; text-align:center; border:1px solid var(--border); }
+  .bs-val { font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:800; }
+  .bs-lbl { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+  .b-section { padding:14px 16px; }
+  .b-section h3 { font-size:13px; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; }
+
+  .b-select { width:100%; padding:12px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:14px; margin-bottom:12px; }
+
+  .b-events { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .b-evt {
+    padding:18px 12px; border-radius:12px; border:2px solid; font-weight:800; cursor:pointer;
+    background:none; text-align:center; transition:all 0.2s; font-size:14px;
+  }
+  .b-evt:active { transform:scale(0.96); }
+  .b-evt .ico { font-size:22px; display:block; margin-bottom:4px; }
+  .b-evt .sub { font-size:11px; color:var(--dim); font-weight:500; display:block; margin-top:2px; }
+  .b-evt.flash { color:#ff6b35; border-color:#ff6b35; }
+  .b-evt.flash:hover { background:rgba(255,107,53,0.08); }
+  .b-evt.pump { color:var(--up); border-color:var(--up); }
+  .b-evt.pump:hover { background:rgba(0,212,160,0.08); }
+  .b-evt.crash { color:var(--down); border-color:var(--down); grid-column:span 2; }
+  .b-evt.crash:hover { background:rgba(255,69,96,0.08); }
+  .b-evt.happy { color:var(--gold); border-color:var(--gold); grid-column:span 2; }
+  .b-evt.happy:hover { background:rgba(255,215,0,0.08); }
+  .b-evt:disabled { opacity:0.25; cursor:not-allowed; }
+
+  .b-active {
+    margin-top:12px; padding:12px; border-radius:10px; display:none; text-align:center;
+    font-weight:700; font-size:14px; background:rgba(108,92,231,0.08); border:1px solid var(--accent);
+  }
+  .b-active.show { display:block; }
+
+  .b-queue { max-height:320px; overflow-y:auto; }
+  .b-order {
+    display:flex; align-items:center; gap:10px; padding:12px; background:var(--bg2);
+    border-radius:10px; margin-bottom:6px; border:1px solid var(--border);
+  }
+  .b-order .emo { font-size:26px; flex-shrink:0; }
+  .b-order .oi { flex:1; }
+  .b-order .oi-name { font-size:14px; font-weight:700; }
+  .b-order .oi-detail { font-size:11px; color:var(--dim); }
+  .b-order .oi-price { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; color:var(--gold); flex-shrink:0; }
+  .b-order .oi-actions { display:flex; gap:6px; flex-shrink:0; }
+  .oi-btn { padding:10px 16px; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+  .oi-btn.ok { background:var(--up); color:#000; }
+  .oi-btn.no { background:var(--down); color:#fff; }
+  .oi-btn:active { transform:scale(0.94); }
+
+  .b-kill {
+    margin:16px; padding:16px; border:2px solid var(--down); border-radius:12px;
+    background:rgba(255,69,96,0.04); text-align:center; cursor:pointer; transition:background 0.2s;
+  }
+  .b-kill:active { background:rgba(255,69,96,0.15); }
+  .b-kill-label { font-size:15px; font-weight:800; color:var(--down); }
+  .b-kill-sub { font-size:11px; color:var(--dim); margin-top:4px; }
+
+  .b-empty { text-align:center; padding:24px; color:var(--dim); font-size:13px; }
+
+  @media(max-width:500px) { .bs { padding:10px 6px; } .bs-val { font-size:20px; } }
+</style>
+</head>
+<body>
+
+<div class="b-header">
+  <span class="b-title">ð¸ Dashboard Barman</span>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span class="dot conn-status"></span>
+    <span class="b-badge">STAFF</span>
+  </div>
+</div>
+<div class="b-stats" id="bStats"></div>
+<div class="b-section">
+  <h3>â¡ ÃvÃ©nements</h3>
+  <select class="b-select" id="bSelect"></select>
+  <div class="b-events">
+    <button class="b-evt flash" onclick="trigEvent('flash_sale')"><span class="ico">â¡</span>Flash Sale<span class="sub">-30% sur produit â¢ 45s</span></button>
+    <button class="b-evt pump" onclick="trigEvent('pump')"><span class="ico">ð</span>Pump<span class="sub">+20% sur produit â¢ 45s</span></button>
+    <button class="b-evt crash" onclick="trigEvent('crash')"><span class="ico">ð¥</span>MARKET CRASH â Tout -50%<span class="sub">DurÃ©e : 30 secondes</span></button>
+    <button class="b-evt happy" onclick="trigEvent('happy_trading')"><span class="ico">ð</span>Happy Trading â VolatilitÃ© Ã3<span class="sub">DurÃ©e : 60 secondes</span></button>
+  </div>
+  <div class="b-active" id="bActive"></div>
+</div>
+<div class="b-section">
+  <h3>ð Commandes en attente</h3>
+  <div class="b-queue" id="bQueue"></div>
+</div>
+<div class="b-kill" onclick="socket.emit('kill')">
+  <div class="b-kill-label" id="bKillLabel">ð´ KILL SWITCH â Geler les prix</div>
+  <div class="b-kill-sub">ArrÃªt d'urgence du moteur de trading</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared.js"></script>
+<script>
+let selectPopulated = false;
+
+function trigEvent(type) {
+  const pid = document.getElementById('bSelect').value;
+  socket.emit('event', { type, pid });
+  const labels = { flash_sale:'â¡ Flash Sale', pump:'ð Pump', crash:'ð¥ Crash', happy_trading:'ð Happy Trading' };
+  showToast(`${labels[type]} dÃ©clenchÃ© !`);
+}
+
+function onStateUpdate() {
+  // Stats
+  document.getElementById('bStats').innerHTML = `
+    <div class="bs"><div class="bs-val" style="color:var(--up)">${S.lb.length}</div><div class="bs-lbl">Tables</div></div>
+    <div class="bs"><div class="bs-val" style="color:var(--gold)">${S.totalOrders}</div><div class="bs-lbl">Commandes</div></div>
+    <div class="bs"><div class="bs-val" style="color:var(--accent)">${S.pendingOrders.length}</div><div class="bs-lbl">En attente</div></div>`;
+
+  // Product select (populate once)
+  if (!selectPopulated && S.products.length > 0) {
+    const sel = document.getElementById('bSelect');
+    sel.innerHTML = '';
+    S.products.forEach(p => { const o = document.createElement('option'); o.value=p.id; o.textContent=`${p.emoji} ${p.name} â ${p.cur.toFixed(2)}â¬`; sel.appendChild(o); });
+    selectPopulated = true;
+  }
+  // Update prices in select
+  if (selectPopulated) {
+    const sel = document.getElementById('bSelect');
+    S.products.forEach((p,i) => { if(sel.options[i]) sel.options[i].textContent = `${p.emoji} ${p.name} â ${p.cur.toFixed(2)}â¬`; });
+  }
+
+  // Active event
+  const ae = document.getElementById('bActive');
+  if (S.event && Date.now() < S.eventEnd) {
+    const secs = Math.max(0, Math.ceil((S.eventEnd - Date.now())/1000));
+    const labels = { flash_sale:'â¡ Flash Sale', pump:'ð Pump', crash:'ð¥ Crash', happy_trading:'ð Happy Trading' };
+    ae.className = 'b-active show';
+    ae.textContent = `${labels[S.event.type]} en cours â ${Math.floor(secs/60)}:${(secs%60).toString().padStart(2,'0')}`;
+  } else { ae.className = 'b-active'; }
+
+  document.querySelectorAll('.b-evt').forEach(b => b.disabled = !!S.event);
+
+  // Orders
+  const q = document.getElementById('bQueue');
+  if (S.pendingOrders.length === 0) {
+    q.innerHTML = '<div class="b-empty">Aucune commande en attente</div>';
+  } else {
+    q.innerHTML = S.pendingOrders.map(o => `
+      <div class="b-order">
+        <span class="emo">${o.emoji}</span>
+        <div class="oi"><div class="oi-name">${o.name} Ã${o.qty}</div><div class="oi-detail">${o.table} â¢ il y a ${Math.ceil((Date.now()-o.time)/1000)}s</div></div>
+        <span class="oi-price">${o.total.toFixed(2)}â¬</span>
+        <div class="oi-actions">
+          <button class="oi-btn ok" onclick="socket.emit('confirm',{oid:'${o.id}'})">â</button>
+          <button class="oi-btn no" onclick="socket.emit('cancel',{oid:'${o.id}'})">â</button>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('bKillLabel').textContent = S.frozen ? 'ð¢ REPRENDRE â Relancer les prix' : 'ð´ KILL SWITCH â Geler les prix';
+}
+</script>
+</body>
+</html>
