@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a1a">
+<title>Trading Drink</title>
+<link rel="stylesheet" href="/shared.css">
+<style>
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .hub { width:100%; max-width:700px; text-align:center; }
+  .logo { font-size:64px; margin-bottom:8px; }
+  .title { font-size:clamp(28px,6vw,44px); font-weight:900; letter-spacing:3px; background:linear-gradient(135deg,#6c5ce7,#a855f7,#00d4a0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+  .sub { color:var(--dim); font-size:15px; margin-bottom:36px; line-height:1.5; }
+  .roles { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:32px; }
+  .role { display:block; text-decoration:none; color:var(--text); background:var(--bg2); border:2px solid var(--border); border-radius:16px; padding:28px 20px; transition:all 0.25s; text-align:center; }
+  .role:hover { border-color:var(--accent); transform:translateY(-4px); box-shadow:0 12px 40px rgba(108,92,231,0.15); }
+  .role .icon { font-size:48px; margin-bottom:10px; display:block; }
+  .role .name { font-size:18px; font-weight:800; margin-bottom:6px; }
+  .role .desc { font-size:13px; color:var(--dim); line-height:1.4; }
+  .role .hint { margin-top:10px; font-size:11px; color:var(--accent); font-weight:600; }
+  .how { text-align:left; background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:24px; }
+  .how h2 { font-size:16px; font-weight:800; margin-bottom:14px; }
+  .how ol { padding-left:20px; color:var(--dim); font-size:14px; line-height:2; }
+  .how ol li { color:var(--text); }
+  .how ol strong { color:var(--accent); }
+  .how .note { margin-top:12px; font-size:12px; color:var(--dim); border-top:1px solid var(--border); padding-top:12px; }
+  .share-box { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; margin-bottom:16px; }
+  .share-box p { font-size:13px; color:var(--dim); margin-bottom:10px; }
+  .share-links { display:flex; flex-direction:column; gap:8px; }
+  .share-link { display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 14px; }
+  .share-link .lbl { font-size:13px; font-weight:600; }
+  .share-link .url { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); word-break:break-all; }
+  .share-link .copy-btn { padding:6px 12px; border:1px solid var(--accent); border-radius:6px; background:none; color:var(--accent); font-size:11px; font-weight:700; cursor:pointer; }
+  .footer { font-size:10px; color:var(--dim); }
+</style>
+</head>
+<body>
+<div class="hub">
+  <div class="logo">\u{1F4C8}</div>
+  <div class="title">TRADING DRINK</div>
+  <div class="sub">Choisissez votre role et rejoignez la partie !</div>
+  <div class="roles">
+    <a href="/mobile.html" class="role"><span class="icon">\u{1F4F1}</span><div class="name">Client</div><div class="desc">Scannez les prix en direct, passez des commandes, gagnez des points.</div><div class="hint">\u2192 Ouvrir sur smartphone</div></a>
+    <a href="/tv" class="role"><span class="icon">\u{1F4FA}</span><div class="name">Ecran TV</div><div class="desc">Graphiques Bloomberg, leaderboard, ticker. A afficher sur la TV du bar.</div><div class="hint">\u2192 Mettre en plein ecran (F11)</div></a>
+    <a href="/barman" class="role"><span class="icon">\u{1F378}</span><div class="name">Barman</div><div class="desc">Declenchez Flash Sale, Crash, Pump. Gerez les commandes en temps reel.</div><div class="hint">\u2192 Le maitre du jeu</div></a>
+  </div>
+  <div class="how">
+    <h2>Comment jouer ensemble</h2>
+    <ol>
+      <li>Envoyez les <strong>liens ci-dessous</strong> a vos collegues</li>
+      <li>Chacun ouvre son role sur son telephone ou son PC</li>
+      <li>Le <strong>Barman</strong> declenche un <strong>Crash</strong> ou une <strong>Flash Sale</strong></li>
+      <li>Tout le monde voit les prix chuter en temps reel !</li>
+      <li>Les <strong>Clients</strong> passent des commandes \u2192 elles arrivent chez le Barman</li>
+      <li>Le Barman confirme \u2192 le Client gagne des points</li>
+    </ol>
+    <div class="note">Astuce : Ouvrez la vue TV sur un grand ecran, et tout le monde voit le spectacle.</div>
+  </div>
+  <div class="share-box">
+    <p><strong>Partagez ces liens</strong> a vos collegues :</p>
+    <div class="share-links" id="shareLinks"></div>
+  </div>
+  <div class="footer">Trading Drink \u2014 A consommer avec moderation.</div>
+</div>
+<script>
+  const base = window.location.origin;
+  const links = [
+    { lbl: 'Client Mobile', url: base + '/mobile.html' },
+    { lbl: 'Ecran TV', url: base + '/tv' },
+    { lbl: 'Dashboard Barman', url: base + '/barman' },
+  ];
+  document.getElementById('shareLinks').innerHTML = links.map(l =>
+    '<div class="share-link"><span class="lbl">'+l.lbl+'</span><span class="url">'+l.url+'</span><button class="copy-btn" onclick="navigator.clipboard.writeText(\''+l.url+'\');this.textContent=\'Copie!\';setTimeout(()=>this.textContent=\'Copier\',1500)">Copier</button></div>'
+  ).join('');
+</script>
+</body>
+</html>
