@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Trading Drink â Barman</title>
+<title>Trading Drink — Barman</title>
 <link rel="stylesheet" href="/shared.css">
 <style>
   .b-header {
@@ -79,7 +79,7 @@
 <body>
 
 <div class="b-header">
-  <span class="b-title">ð¸ Dashboard Barman</span>
+  <span class="b-title">🍸 Dashboard Barman</span>
   <div style="display:flex;align-items:center;gap:8px;">
     <span class="dot conn-status"></span>
     <span class="b-badge">STAFF</span>
@@ -87,23 +87,23 @@
 </div>
 <div class="b-stats" id="bStats"></div>
 <div class="b-section">
-  <h3>â¡ ÃvÃ©nements</h3>
+  <h3>⚡ Événements</h3>
   <select class="b-select" id="bSelect"></select>
   <div class="b-events">
-    <button class="b-evt flash" onclick="trigEvent('flash_sale')"><span class="ico">â¡</span>Flash Sale<span class="sub">-30% sur produit â¢ 45s</span></button>
-    <button class="b-evt pump" onclick="trigEvent('pump')"><span class="ico">ð</span>Pump<span class="sub">+20% sur produit â¢ 45s</span></button>
-    <button class="b-evt crash" onclick="trigEvent('crash')"><span class="ico">ð¥</span>MARKET CRASH â Tout -50%<span class="sub">DurÃ©e : 30 secondes</span></button>
-    <button class="b-evt happy" onclick="trigEvent('happy_trading')"><span class="ico">ð</span>Happy Trading â VolatilitÃ© Ã3<span class="sub">DurÃ©e : 60 secondes</span></button>
+    <button class="b-evt flash" onclick="trigEvent('flash_sale')"><span class="ico">⚡</span>Flash Sale<span class="sub">-30% sur produit • 45s</span></button>
+    <button class="b-evt pump" onclick="trigEvent('pump')"><span class="ico">🚀</span>Pump<span class="sub">+20% sur produit • 45s</span></button>
+    <button class="b-evt crash" onclick="trigEvent('crash')"><span class="ico">💥</span>MARKET CRASH — Tout -50%<span class="sub">Durée : 30 secondes</span></button>
+    <button class="b-evt happy" onclick="trigEvent('happy_trading')"><span class="ico">🎉</span>Happy Trading — Volatilité ×3<span class="sub">Durée : 60 secondes</span></button>
   </div>
   <div class="b-active" id="bActive"></div>
 </div>
 <div class="b-section">
-  <h3>ð Commandes en attente</h3>
+  <h3>📋 Commandes en attente</h3>
   <div class="b-queue" id="bQueue"></div>
 </div>
 <div class="b-kill" onclick="socket.emit('kill')">
-  <div class="b-kill-label" id="bKillLabel">ð´ KILL SWITCH â Geler les prix</div>
-  <div class="b-kill-sub">ArrÃªt d'urgence du moteur de trading</div>
+  <div class="b-kill-label" id="bKillLabel">🔴 KILL SWITCH — Geler les prix</div>
+  <div class="b-kill-sub">Arrêt d'urgence du moteur de trading</div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -115,8 +115,8 @@ let selectPopulated = false;
 function trigEvent(type) {
   const pid = document.getElementById('bSelect').value;
   socket.emit('event', { type, pid });
-  const labels = { flash_sale:'â¡ Flash Sale', pump:'ð Pump', crash:'ð¥ Crash', happy_trading:'ð Happy Trading' };
-  showToast(`${labels[type]} dÃ©clenchÃ© !`);
+  const labels = { flash_sale:'⚡ Flash Sale', pump:'🚀 Pump', crash:'💥 Crash', happy_trading:'🎉 Happy Trading' };
+  showToast(`${labels[type]} déclenché !`);
 }
 
 function onStateUpdate() {
@@ -130,22 +130,22 @@ function onStateUpdate() {
   if (!selectPopulated && S.products.length > 0) {
     const sel = document.getElementById('bSelect');
     sel.innerHTML = '';
-    S.products.forEach(p => { const o = document.createElement('option'); o.value=p.id; o.textContent=`${p.emoji} ${p.name} â ${p.cur.toFixed(2)}â¬`; sel.appendChild(o); });
+    S.products.forEach(p => { const o = document.createElement('option'); o.value=p.id; o.textContent=`${p.emoji} ${p.name} — ${p.cur.toFixed(2)}€`; sel.appendChild(o); });
     selectPopulated = true;
   }
   // Update prices in select
   if (selectPopulated) {
     const sel = document.getElementById('bSelect');
-    S.products.forEach((p,i) => { if(sel.options[i]) sel.options[i].textContent = `${p.emoji} ${p.name} â ${p.cur.toFixed(2)}â¬`; });
+    S.products.forEach((p,i) => { if(sel.options[i]) sel.options[i].textContent = `${p.emoji} ${p.name} — ${p.cur.toFixed(2)}€`; });
   }
 
   // Active event
   const ae = document.getElementById('bActive');
   if (S.event && Date.now() < S.eventEnd) {
     const secs = Math.max(0, Math.ceil((S.eventEnd - Date.now())/1000));
-    const labels = { flash_sale:'â¡ Flash Sale', pump:'ð Pump', crash:'ð¥ Crash', happy_trading:'ð Happy Trading' };
+    const labels = { flash_sale:'⚡ Flash Sale', pump:'🚀 Pump', crash:'💥 Crash', happy_trading:'🎉 Happy Trading' };
     ae.className = 'b-active show';
-    ae.textContent = `${labels[S.event.type]} en cours â ${Math.floor(secs/60)}:${(secs%60).toString().padStart(2,'0')}`;
+    ae.textContent = `${labels[S.event.type]} en cours — ${Math.floor(secs/60)}:${(secs%60).toString().padStart(2,'0')}`;
   } else { ae.className = 'b-active'; }
 
   document.querySelectorAll('.b-evt').forEach(b => b.disabled = !!S.event);
@@ -158,16 +158,16 @@ function onStateUpdate() {
     q.innerHTML = S.pendingOrders.map(o => `
       <div class="b-order">
         <span class="emo">${o.emoji}</span>
-        <div class="oi"><div class="oi-name">${o.name} Ã${o.qty}</div><div class="oi-detail">${o.table} â¢ il y a ${Math.ceil((Date.now()-o.time)/1000)}s</div></div>
-        <span class="oi-price">${o.total.toFixed(2)}â¬</span>
+        <div class="oi"><div class="oi-name">${o.name} ×${o.qty}</div><div class="oi-detail">${o.table} • il y a ${Math.ceil((Date.now()-o.time)/1000)}s</div></div>
+        <span class="oi-price">${o.total.toFixed(2)}€</span>
         <div class="oi-actions">
-          <button class="oi-btn ok" onclick="socket.emit('confirm',{oid:'${o.id}'})">â</button>
-          <button class="oi-btn no" onclick="socket.emit('cancel',{oid:'${o.id}'})">â</button>
+          <button class="oi-btn ok" onclick="socket.emit('confirm',{oid:'${o.id}'})">✓</button>
+          <button class="oi-btn no" onclick="socket.emit('cancel',{oid:'${o.id}'})">✕</button>
         </div>
       </div>`).join('');
   }
 
-  document.getElementById('bKillLabel').textContent = S.frozen ? 'ð¢ REPRENDRE â Relancer les prix' : 'ð´ KILL SWITCH â Geler les prix';
+  document.getElementById('bKillLabel').textContent = S.frozen ? '🟢 REPRENDRE — Relancer les prix' : '🔴 KILL SWITCH — Geler les prix';
 }
 </script>
 </body>
